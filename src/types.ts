@@ -2,6 +2,8 @@ export interface Invoice {
     id: number;
     line_item_id: number;
     adjustments: number;
+    createdAt: string;
+    updatedAt: string;
 }
 
 export interface LineItem {
@@ -10,6 +12,8 @@ export interface LineItem {
     name: string;
     booked_amount: number;
     actual_amount: number;
+    createdAt: string;
+    updatedAt: string;
     Invoice: Invoice;
 }
 
@@ -22,7 +26,7 @@ export interface Campaign {
     totalAdjustment: number;
 }
 
-export interface CampaignsResponse {
+export interface CampaignsListResponse {
   data: Campaign[];
   pagination: Pagination;
 }
@@ -34,4 +38,16 @@ export interface Pagination {
   itemsPerPage: number;
   hasNextPage: boolean;
   hasPreviousPage: boolean;
+}
+
+export interface CampaignDetail {
+  id: number;
+  name: string;
+  createdAt: string;
+  updatedAt: string;
+  LineItems: LineItem[];
+}
+
+export interface CampaignDetailResponse {
+  data: CampaignDetail;
 }

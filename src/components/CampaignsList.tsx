@@ -21,7 +21,7 @@ const CampaignsList = () => {
             setLoading(true);
             setError(null);
             const result = await fetchCampaigns(page);
-            setCampaigns(result.campaigns);
+            setCampaigns(result.data);
             setPagination(result.pagination);
         } catch (err) {
             setError(
@@ -145,7 +145,7 @@ const CampaignsList = () => {
     return (
         <div className="p-4">
             <div className="d-flex justify-content-between align-items-center mb-4">
-                <h4 className="mb-0">Campaigns</h4>
+                <h4 className="mb-0">Campaigns List</h4>
                 {pagination && (
                     <div className="text-muted">
                         Showing{' '}

@@ -1,13 +1,9 @@
-import type { CampaignsResponse, Campaign, Pagination } from '../types';
+import type { CampaignDetail, CampaignDetailResponse, CampaignsListResponse } from '../types';
 
 const API_BASE_URL = 'http://localhost:3000/api';
 
-export interface CampaignsResult {
-  campaigns: Campaign[];
-  pagination: Pagination;
-}
 
-export const fetchCampaigns = async (page: number = 1): Promise<CampaignsResult> => {
+export const fetchCampaigns = async (page: number = 1): Promise<CampaignsListResponse> => {
   try {
     const response = await fetch(`${API_BASE_URL}/campaigns?page=${page}`);
 
@@ -15,9 +11,8 @@ export const fetchCampaigns = async (page: number = 1): Promise<CampaignsResult>
       throw new Error(`HTTP error! status: ${response.status}`);
     }
 
-    const data: CampaignsResponse = await response.json();
+    const data: CampaignsListResponse = await response.json();
 
-    // Transform the data to include calculated totals
     const campaigns = data.data.map(campaign => {
       return {
         id: campaign.id,
@@ -30,11 +25,27 @@ export const fetchCampaigns = async (page: number = 1): Promise<CampaignsResult>
     });
 
     return {
-      campaigns,
+      data: campaigns,
       pagination: data.pagination
     };
   } catch (error) {
     console.error('Error fetching campaigns:', error);
+    throw error;
+  }
+};
+
+export const fetchCampaignDetail = async (id: number): Promise<CampaignDetail> => {
+  try {
+    const response = await fetch(`${API_BASE_URL}/campaigns/${id}`);
+
+    if (!response.ok) {
+      throw new Error(`HTTP error! status: ${response.status}`);
+    }
+
+    const data: CampaignDetailResponse = await response.json();
+    return data.data;
+  } catch (error) {
+    console.error('Error fetching campaign detail:', error);
     throw error;
   }
 };
