@@ -1,45 +1,38 @@
-import { CampaignsResponse, CampaignSummary } from '../types';
+import type { CampaignsResponse, Campaign, Pagination } from '../types';
 
 const API_BASE_URL = 'http://localhost:3000/api';
 
-export const fetchCampaigns = async (): Promise<CampaignSummary[]> => {
+export interface CampaignsResult {
+  campaigns: Campaign[];
+  pagination: Pagination;
+}
+
+export const fetchCampaigns = async (page: number = 1): Promise<CampaignsResult> => {
   try {
-    const response = await fetch(`${API_BASE_URL}/campaigns`);
-    
+    const response = await fetch(`${API_BASE_URL}/campaigns?page=${page}`);
+
     if (!response.ok) {
       throw new Error(`HTTP error! status: ${response.status}`);
     }
-    
+
     const data: CampaignsResponse = await response.json();
-    
+
     // Transform the data to include calculated totals
-    return data.data.map(campaign => {
-      const lineItemsCount = campaign.LineItems.length;
-      
-      const totalBooked = campaign.LineItems.reduce(
-        (sum, item) => sum + item.booked_amount, 
-        0
-      );
-      
-      const totalActual = campaign.LineItems.reduce(
-        (sum, item) => sum + item.actual_amount, 
-        0
-      );
-      
-      const totalFinal = campaign.LineItems.reduce(
-        (sum, item) => sum + item.actual_amount + (item.Invoice?.adjustments || 0), 
-        0
-      );
-      
+    const campaigns = data.data.map(campaign => {
       return {
         id: campaign.id,
         name: campaign.name,
-        lineItemsCount,
-        totalBooked,
-        totalActual,
-        totalFinal
+        lineItemCount: campaign.lineItemCount,
+        totalBooked: campaign.totalBooked,
+        totalActual: campaign.totalActual,
+        totalAdjustment: campaign.totalAdjustment
       };
     });
+
+    return {
+      campaigns,
+      pagination: data.pagination
+    };
   } catch (error) {
     console.error('Error fetching campaigns:', error);
     throw error;
