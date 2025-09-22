@@ -1,4 +1,4 @@
-import type { CampaignDetail, CampaignDetailResponse, CampaignsListResponse } from '../types';
+import type { CampaignDetail, CampaignDetailResponse, CampaignsListResponse, LineItemDetail, LineItemDetailResponse, InvoiceDetail, InvoiceDetailResponse } from '../types';
 
 const API_BASE_URL = 'http://localhost:3000/api';
 
@@ -46,6 +46,60 @@ export const fetchCampaignDetail = async (id: number): Promise<CampaignDetail> =
     return data.data;
   } catch (error) {
     console.error('Error fetching campaign detail:', error);
+    throw error;
+  }
+};
+
+export const fetchLineItemDetail = async (id: number): Promise<LineItemDetail> => {
+  try {
+    const response = await fetch(`${API_BASE_URL}/lineitems/${id}`);
+
+    if (!response.ok) {
+      throw new Error(`HTTP error! status: ${response.status}`);
+    }
+
+    const data: LineItemDetailResponse = await response.json();
+    return data.data;
+  } catch (error) {
+    console.error('Error fetching line item detail:', error);
+    throw error;
+  }
+};
+
+export const fetchInvoiceDetail = async (id: number): Promise<InvoiceDetail> => {
+  try {
+    const response = await fetch(`${API_BASE_URL}/invoices/${id}`);
+
+    if (!response.ok) {
+      throw new Error(`HTTP error! status: ${response.status}`);
+    }
+
+    const data: InvoiceDetailResponse = await response.json();
+    return data.data;
+  } catch (error) {
+    console.error('Error fetching invoice detail:', error);
+    throw error;
+  }
+};
+
+export const updateInvoiceAdjustment = async (id: number, adjustment: number): Promise<{ data: { id: number; line_item_id: number; adjustments: number; createdAt: string; updatedAt: string; }; message: string; }> => {
+  try {
+    const response = await fetch(`${API_BASE_URL}/invoices/${id}/adjustment`, {
+      method: 'PATCH',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify({ adjustment }),
+    });
+
+    if (!response.ok) {
+      throw new Error(`HTTP error! status: ${response.status}`);
+    }
+
+    const data = await response.json();
+    return data;
+  } catch (error) {
+    console.error('Error updating invoice adjustment:', error);
     throw error;
   }
 };

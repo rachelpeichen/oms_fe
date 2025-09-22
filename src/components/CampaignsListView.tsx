@@ -1,15 +1,19 @@
 import { useState, useEffect } from 'react';
+import { useNavigate } from 'react-router-dom';
 import type { Campaign, Pagination } from '../types';
 import { fetchCampaigns } from '../services/api';
+import { formatCurrency, handleApiError, tableRowHoverStyles } from '../utils/utility';
+import { LoadingSpinner, ErrorAlert, BreadcrumbNav } from './common';
 import {
+    Container,
     Table,
-    Spinner,
-    Alert,
     Badge,
     Pagination as BootstrapPagination,
 } from 'react-bootstrap';
+import './index.css';
 
-const CampaignsList = () => {
+const CampaignsListView = () => {
+    const navigate = useNavigate();
     const [campaigns, setCampaigns] = useState<Campaign[]>([]);
     const [pagination, setPagination] = useState<Pagination | null>(null);
     const [currentPage, setCurrentPage] = useState(1);
@@ -24,9 +28,7 @@ const CampaignsList = () => {
             setCampaigns(result.data);
             setPagination(result.pagination);
         } catch (err) {
-            setError(
-                err instanceof Error ? err.message : 'Failed to fetch campaigns'
-            );
+            setError(handleApiError(err, 'Failed to fetch campaigns'));
         } finally {
             setLoading(false);
         }
@@ -40,31 +42,17 @@ const CampaignsList = () => {
         setCurrentPage(page);
     };
 
-    const formatCurrency = (amount: number): string => {
-        return new Intl.NumberFormat('en-US', {
-            style: 'currency',
-            currency: 'USD',
-            minimumFractionDigits: 2,
-            maximumFractionDigits: 2,
-        }).format(amount);
+    const handleRowClick = (campaignId: number) => {
+        navigate(`/campaigns/${campaignId}`);
     };
 
+
     if (loading) {
-        return (
-            <div className="p-4">
-                <Spinner animation="border" role="status">
-                    <span className="visually-hidden">Loading...</span>
-                </Spinner>
-            </div>
-        );
+        return <LoadingSpinner message="Loading campaigns..." />;
     }
 
     if (error) {
-        return (
-            <div className="p-4">
-                <Alert variant="danger">Error: {error}</Alert>
-            </div>
-        );
+        return <ErrorAlert error={error} />;
     }
 
     const renderPagination = () => {
@@ -142,10 +130,15 @@ const CampaignsList = () => {
         );
     };
 
+    const breadcrumbItems = [
+        { text: 'Campaigns List', active: true }
+    ];
+
     return (
-        <div className="p-4">
-            <div className="d-flex justify-content-between align-items-center mb-4">
-                <h4 className="mb-0">Campaigns List</h4>
+        <Container className="p-4">
+            <BreadcrumbNav items={breadcrumbItems} navigate={navigate} />
+
+            <div className="d-flex justify-content-end align-items-center mb-4">
                 {pagination && (
                     <div className="text-muted">
                         Showing{' '}
@@ -162,11 +155,12 @@ const CampaignsList = () => {
             <Table striped hover responsive className="w-100">
                 <thead className="table-primary">
                     <tr>
-                        <th>Campaign Name</th>
-                        <th className="text-center">Line Items Quantity</th>
-                        <th className="text-end">Total Booked</th>
-                        <th className="text-end">Total Actual</th>
-                        <th className="text-end">Total Adjustment</th>
+                        <th className="text-center">ID</th>
+                        <th className="text-center">Name</th>
+                        <th className="text-center">Line Items</th>
+                        <th className="text-center">Total Booked</th>
+                        <th className="text-center">Total Actual</th>
+                        <th className="text-center">Total Adjustment</th>
                     </tr>
                 </thead>
                 <tbody>
@@ -178,7 +172,13 @@ const CampaignsList = () => {
                         </tr>
                     ) : (
                         campaigns.map((campaign) => (
-                            <tr key={campaign.id}>
+                            <tr
+                                key={campaign.id}
+                                style={tableRowHoverStyles}
+                                onClick={() => handleRowClick(campaign.id)}
+                                className="table-row-hover"
+                            >
+                                <td className="fw-medium">{campaign.id}</td>
                                 <td className="fw-medium">{campaign.name}</td>
                                 <td className="text-center">
                                     <Badge bg="secondary">
@@ -201,8 +201,8 @@ const CampaignsList = () => {
             </Table>
 
             {renderPagination()}
-        </div>
+        </Container>
     );
 };
 
-export default CampaignsList;
+export default CampaignsListView;

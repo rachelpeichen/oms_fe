@@ -2,8 +2,6 @@ export interface Invoice {
     id: number;
     line_item_id: number;
     adjustments: number;
-    createdAt: string;
-    updatedAt: string;
 }
 
 export interface LineItem {
@@ -12,8 +10,6 @@ export interface LineItem {
     name: string;
     booked_amount: number;
     actual_amount: number;
-    createdAt: string;
-    updatedAt: string;
     Invoice: Invoice;
 }
 
@@ -43,11 +39,52 @@ export interface Pagination {
 export interface CampaignDetail {
   id: number;
   name: string;
-  createdAt: string;
-  updatedAt: string;
   LineItems: LineItem[];
 }
 
 export interface CampaignDetailResponse {
   data: CampaignDetail;
+}
+
+export interface LineItemDetail {
+  id: number;
+  campaign_id: number;
+  name: string;
+  booked_amount: number;
+  actual_amount: number;
+  Campaign: {
+    id: number;
+    name: string;
+  };
+  Invoice: {
+    id: number;
+    adjustments: number;
+  };
+}
+
+export interface LineItemDetailResponse {
+  data: LineItemDetail;
+}
+
+export interface InvoiceDetail {
+  id: number;
+  line_item_id: number;
+  adjustments: number;
+  createdAt: string;
+  updatedAt: string;
+  LineItem: {
+    id: number;
+    name: string;
+    booked_amount: number;
+    actual_amount: number;
+    campaign_id: number;
+    Campaign: {
+      id: number;
+      name: string;
+    };
+  };
+}
+
+export interface InvoiceDetailResponse {
+  data: InvoiceDetail;
 }
