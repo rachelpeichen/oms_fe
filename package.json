@@ -11,9 +11,11 @@
   },
   "dependencies": {
     "@types/bootstrap": "^5.2.10",
+    "@types/exceljs": "^0.5.3",
     "@types/react-bootstrap": "^1.0.1",
     "@types/react-router-dom": "^5.3.3",
     "bootstrap": "^5.3.8",
+    "exceljs": "^4.4.0",
     "react": "^19.1.1",
     "react-bootstrap": "^2.10.10",
     "react-dom": "^19.1.1",

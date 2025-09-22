@@ -2,8 +2,19 @@ import { useState, useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { fetchCampaignDetail } from '../services/api';
 import type { CampaignDetail } from '../types';
-import { formatCurrency, handleApiError, tableRowHoverStyles } from '../utils/utility';
-import { LoadingSpinner, ErrorAlert, NotFoundAlert, BackButtonGroup, BreadcrumbNav } from './common';
+import {
+    formatCurrency,
+    handleApiError,
+    tableRowHoverStyles,
+} from '../utils/utility';
+import {
+    LoadingSpinner,
+    ErrorAlert,
+    NotFoundAlert,
+    BackButtonGroup,
+    BreadcrumbNav,
+    ExportInvoicesButton,
+} from './common';
 import {
     Container,
     Row,
@@ -31,7 +42,9 @@ const CampaignDetailView = () => {
                 const data = await fetchCampaignDetail(parseInt(id));
                 setCampaign(data);
             } catch (err) {
-                setError(handleApiError(err, 'Failed to fetch campaign detail'));
+                setError(
+                    handleApiError(err, 'Failed to fetch campaign detail')
+                );
             } finally {
                 setLoading(false);
             }
@@ -39,7 +52,6 @@ const CampaignDetailView = () => {
 
         loadCampaignDetail();
     }, [id]);
-
 
     if (loading) {
         return <LoadingSpinner message="Loading campaign details..." />;
@@ -60,12 +72,24 @@ const CampaignDetailView = () => {
 
     const breadcrumbItems = [
         { text: 'Campaigns List', path: '/' },
-        { text: 'Campaign Detail', active: true }
+        { text: 'Campaign Detail', active: true },
     ];
 
     const backButtons = [
-        { text: 'Back to Campaigns List', onClick: () => navigate('/') }
+        { text: 'Back to Campaigns List', onClick: () => navigate('/') },
     ];
+
+    // transform the data for Excel export
+    const excelData = campaign?.LineItems.map(lineItem => ({
+        campaign_id: campaign.id,
+        campaign_name: campaign.name,
+        lineitem_name: lineItem.name,
+        lineitem_id: lineItem.id,
+        booked_amount: lineItem.booked_amount,
+        actual_amount: lineItem.actual_amount,
+        adjustments: lineItem.Invoice.adjustments,
+        invoice_id: lineItem.Invoice.id
+    })) || [];
 
     return (
         <Container className="p-4">
@@ -112,78 +136,97 @@ const CampaignDetailView = () => {
                                     No line items found for this campaign
                                 </p>
                             ) : (
-                                <Table striped hover responsive>
-                                    <thead className="table-primary">
-                                        <tr>
-                                            <th className="text-center">
-                                                Line Item ID
-                                            </th>
-                                            <th className="text-center">
-                                                Line Item Name
-                                            </th>
-                                            <th className="text-center">
-                                                Booked Amount
-                                            </th>
-                                            <th className="text-center">
-                                                Actual Amount
-                                            </th>
-                                            <th className="text-center">
-                                                Adjustment
-                                            </th>
-                                            <th className="text-center">
-                                                Final Amount
-                                            </th>
-                                            <th className="text-center">
-                                                Invoice ID
-                                            </th>
-
-                                        </tr>
-                                    </thead>
-                                    <tbody>
-                                        {campaign.LineItems.map((lineItem) => (
-                                            <tr
-                                                key={lineItem.id}
-                                                style={tableRowHoverStyles}
-                                                onClick={() => navigate(`/lineitems/${lineItem.id}`)}
-                                                className="table-row-hover"
-                                            >
-                                                <td className="text-center fw-medium">
-                                                    {lineItem.id}
-                                                </td>
-                                                <td className="text-start fw-medium">
-                                                    {lineItem.name}
-                                                </td>
-                                                <td className="text-center text-primary fw-bold">
-                                                    {formatCurrency(
-                                                        lineItem.booked_amount
-                                                    )}
-                                                </td>
-                                                <td className="text-center text-success fw-bold">
-                                                    {formatCurrency(
-                                                        lineItem.actual_amount
-                                                    )}
-                                                </td>
-                                                <td className="text-center text-warning fw-bold">
-                                                    {formatCurrency(
-                                                        lineItem.Invoice
-                                                            .adjustments
-                                                    )}
-                                                </td>
-                                                <td className="text-center text-info fw-bold">
-                                                    {formatCurrency(
-                                                        lineItem.actual_amount +
-                                                            lineItem.Invoice
-                                                                .adjustments
-                                                    )}
-                                                </td>
-                                                <td className="text-center fw-medium">
-                                                    {lineItem.Invoice.id}
-                                                </td>
-
+                                <>
+                                    <Table striped hover responsive>
+                                        <thead className="table-primary">
+                                            <tr>
+                                                <th className="text-center">
+                                                    Line Item ID
+                                                </th>
+                                                <th className="text-center">
+                                                    Line Item Name
+                                                </th>
+                                                <th className="text-center">
+                                                    Booked Amount
+                                                </th>
+                                                <th className="text-center">
+                                                    Actual Amount
+                                                </th>
+                                                <th className="text-center">
+                                                    Adjustment
+                                                </th>
+                                                <th className="text-center">
+                                                    Final Amount
+                                                </th>
+                                                <th className="text-center">
+                                                    Invoice ID
+                                                </th>
                                             </tr>
-                                        ))}
-                                    </tbody>
-                                </Table>
+                                        </thead>
+                                        <tbody>
+                                            {campaign.LineItems.map(
+                                                (lineItem) => (
+                                                    <tr
+                                                        key={lineItem.id}
+                                                        style={
+                                                            tableRowHoverStyles
+                                                        }
+                                                        onClick={() =>
+                                                            navigate(
+                                                                `/lineitems/${lineItem.id}`
+                                                            )
+                                                        }
+                                                        className="table-row-hover">
+                                                        <td className="text-center fw-medium">
+                                                            {lineItem.id}
+                                                        </td>
+                                                        <td className="text-start fw-medium">
+                                                            {lineItem.name}
+                                                        </td>
+                                                        <td className="text-center text-primary fw-bold">
+                                                            {formatCurrency(
+                                                                lineItem.booked_amount
+                                                            )}
+                                                        </td>
+                                                        <td className="text-center text-success fw-bold">
+                                                            {formatCurrency(
+                                                                lineItem.actual_amount
+                                                            )}
+                                                        </td>
+                                                        <td className="text-center text-warning fw-bold">
+                                                            {formatCurrency(
+                                                                lineItem.Invoice
+                                                                    .adjustments
+                                                            )}
+                                                        </td>
+                                                        <td className="text-center text-info fw-bold">
+                                                            {formatCurrency(
+                                                                lineItem.actual_amount +
+                                                                    lineItem
+                                                                        .Invoice
+                                                                        .adjustments
+                                                            )}
+                                                        </td>
+                                                        <td className="text-center fw-medium">
+                                                            {
+                                                                lineItem.Invoice
+                                                                    .id
+                                                            }
+                                                        </td>
+                                                    </tr>
+                                                )
+                                            )}
+                                        </tbody>
+                                    </Table>
+                                    <div className="d-flex justify-content-end mt-3">
+                                        <ExportInvoicesButton
+                                            data={excelData}
+                                            campaignId={campaign.id}
+                                            campaignName={campaign.name}
+                                            disabled={excelData.length === 0}
+                                        />
+                                    </div>
+                                </>
                             )}
                         </Card.Body>
                     </Card>
