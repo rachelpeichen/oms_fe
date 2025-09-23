@@ -19,7 +19,7 @@ RUN npm run build
 # Expose port 4173 (Vite preview default port)
 EXPOSE 4173
 
-ENV REACT_APP_API_BASE_URL=http://localhost:3000/api
+ENV VITE_API_BASE_URL=http://localhost:3000/api
 
 # Run the preview command
 CMD ["npm", "run", "preview", "--", "--host", "0.0.0.0"]
