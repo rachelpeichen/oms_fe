@@ -13,17 +13,17 @@ A modern React-based Order Management System built with TypeScript and Vite, fea
 
 ## Getting Started
 
-1. Clone the repository
+1. **Clone the repository**
 ```bash
 git clone git@github.com:rachelpeichen/oms_fe.git
 ```
 
-2. Install dependencies
+2. **Install dependencies**
 ```bash
 npm install
 ```
 
-3. Start the development server
+3. **Start the development server**
 ```bash
 npm run dev
 ```
@@ -32,12 +32,12 @@ npm run dev
 
 The application includes Docker configuration for easy deployment:
 
-1. Build the Docker image
+1. **Build the Docker image**
 ```bash
 docker build -t oms-app .
 ```
 
-2. Run the container
+2. **Run the container**
 ```bash
 docker run -p 4173:4173 oms-app
 ```
