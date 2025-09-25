@@ -1,6 +1,6 @@
 # OMS - Order Management System
 
-A modern React-based Order Management System built with TypeScript and Vite, featuring comprehensive campaign and invoice management capabilities.
+A React Order Management System for managing campaigns, line items, and invoices.
 
 ## Tech Stack
 
